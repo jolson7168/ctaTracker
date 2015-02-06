@@ -1,10 +1,8 @@
-from __future__ import print_function
 import glob
 import os
 import json
 import csv
 import logging
-from collections import defaultdict
 import sys
 import getopt
 import time
