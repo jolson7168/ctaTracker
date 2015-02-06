@@ -86,14 +86,14 @@ def makeRouteRequest(url, routes, apiKeys):
 		for error in fixes["error"]:
 			if isinstance(error, basestring):
 				errorStr=fixes["error"]["rt"]
-				logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") No data reported on the following route: "+errorStr)
 			else:
 				if "rt" in error:
 					errorStr=errorStr+error["rt"]+","
-					logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") No data reported on the following routes: "+errorStr[:-1])
-				else:
-					logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") General error: "+error)
-								
+		if (errorStr == ""):
+			logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") General error: "+error)
+		else:
+			logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") No data reported on the following route: "+errorStr)
+
 	if "vehicle" in fixes:
 		for vehicle in fixes["vehicle"]:
 			if "vid" in vehicle: 
@@ -161,6 +161,7 @@ def main(argv):
 				fixes=makeRouteRequest(config["vehiclesURL"],routeRequests[x], apiKeys)
 				if currentDay<>currentDayStr():    # A new day is upon us
 					currentDay = currentDayStr()
+					apiKeys=initAPIKeys(config["apiKeys"])  #reset the counters
 				dumpFixes(fixes, currentDay)
 	logger.info('Done!  ========================================')
 
