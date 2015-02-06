@@ -79,7 +79,7 @@ def makeRouteRequest(url, routes, apiKeys):
 	tempFixes = {}
 	f1=requests.get(url+apiKeys[whichKey].key+"&rt="+routes)
 	apiKeys[whichKey].counter = apiKeys[whichKey].counter+1
-	logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") Requesting Fixes by routes ("+routes+")"+"...")
+	logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") Requesting fixes by routes ("+routes+")"+"...")
 	fixes = dict(xmltodict.parse(f1.text)['bustime-response'])
 	if "error" in fixes:
 		errorStr=""
@@ -92,7 +92,9 @@ def makeRouteRequest(url, routes, apiKeys):
 		if (errorStr == ""):
 			logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") General error: "+error)
 		else:
-			logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") No data reported on the following route: "+errorStr)
+			if errorStr[-1:]=",":
+				errorStr = errorStr[:-1] 	
+			logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") No data reported on the following routes: "+errorStr)
 
 	if "vehicle" in fixes:
 		for vehicle in fixes["vehicle"]:
