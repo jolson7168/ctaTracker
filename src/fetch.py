@@ -16,7 +16,21 @@ import xmltodict
 config = {}
 apiKeys=[]
 routes = {}
-requestCount = 0
+
+class apiKey:
+  def __init__(self):
+    self.key = ""
+    self.counter = 0
+
+def initAPIKeys(configAPIKeys):
+	apiKeys = []
+	for x in range (0, len(configAPIKeys)):
+		newKey = apiKey()
+		newKey.key = configAPIKeys[x]
+		newKey.counter = 0
+		apiKeys.append(newKey)
+
+	return apiKeys	
 
 def currentDayStr():
 	return time.strftime("%Y%m%d")
@@ -33,18 +47,17 @@ def initLog():
 	logger.setLevel(logging.INFO)
 	return logger
 
-def fetchRoutes(url, apiKey):
-	global requestCount
-
+def fetchRoutes(url, apiKeys):
+	whichKey = int(time.strftime("%H")) % len(apiKeys)
 	logger = logging.getLogger(config["logname"])
 	tempRoutes = {}
-	r1=requests.get(url+apiKey)
-	requestCount = requestCount+1
-	logger.info("(Request count: "+str(requestCount)+") Requesting Routes...")
+	r1=requests.get(url+apiKeys[whichKey].key)
+	apiKeys[whichKey].counter = apiKeys[whichKey].counter+1
+	logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") Requesting Routes...")
 	routes = dict(xmltodict.parse(r1.text)['bustime-response'])
 	for route in routes["route"]:
 		tempRoutes[route["rt"]]=route
-	logger.info("(Request count: "+str(requestCount)+") Got "+ str(len(tempRoutes.keys()))+" routes")
+	logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") Got "+ str(len(tempRoutes.keys()))+" routes")
 	return tempRoutes
 
 def breakupRoutes(routes, numPerReq):
@@ -60,28 +73,28 @@ def breakupRoutes(routes, numPerReq):
 	routeRequests.append(thisEntry[:-1])
 	return routeRequests
 
-def makeRouteRequest(url, routes, apiKey):
-	global requestCount
+def makeRouteRequest(url, routes, apiKeys):
 
 	logger = logging.getLogger(config["logname"])
+	whichKey = int(time.strftime("%H")) % len(apiKeys)
 	fixArray = []
 	tempFixes = {}
-	f1=requests.get(url+apiKey+"&rt="+routes)
-	requestCount = requestCount+1
-	logger.info("(Request count: "+str(requestCount)+") Requesting Fixes by routes ("+routes+")"+"...")
+	f1=requests.get(url+apiKeys[whichKey].key+"&rt="+routes)
+	apiKeys[whichKey].counter = apiKeys[whichKey].counter+1
+	logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") Requesting Fixes by routes ("+routes+")"+"...")
 	fixes = dict(xmltodict.parse(f1.text)['bustime-response'])
 	if "error" in fixes:
 		errorStr=""
 		for error in fixes["error"]:
 			if isinstance(error, basestring):
 				errorStr=fixes["error"]["rt"]
-				logger.info("(Request count: "+str(requestCount)+") No data reported on the following route: "+errorStr)
+				logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") No data reported on the following route: "+errorStr)
 			else:
 				if "rt" in error:
 					errorStr=errorStr+error["rt"]+","
-					logger.info("(Request count: "+str(requestCount)+") No data reported on the following routes: "+errorStr[:-1])
+					logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") No data reported on the following routes: "+errorStr[:-1])
 				else:
-					logger.info("(Request count: "+str(requestCount)+") General error: "+error)
+					logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") General error: "+error)
 								
 	if "vehicle" in fixes:
 		for vehicle in fixes["vehicle"]:
@@ -101,19 +114,21 @@ def makeRouteRequest(url, routes, apiKey):
 				vehicle["spd"] = int(vehicle["spd"])
 			if "tatripid" in vehicle:
 				vehicle["tatripid"] = int(vehicle["tatripid"])
-			if "tmstmp" in vehicle:
-				vehicle["timestr"] = vehicle["tmstmp"].split(' ')[0]
-				vehicle["datestr"] = vehicle["tmstmp"].split(' ')[1]
-				vehicle["javascripttime"] = int(time.mktime(time.strptime(vehicle["tmstmp"], "%Y%m%d %H:%M"))*1000)
+			# Nice to have, but takes up too much space...			
+			#if "tmstmp" in vehicle:
+			#	vehicle["javascripttime"] = int(time.mktime(time.strptime(vehicle["tmstmp"], "%Y%m%d %H:%M"))*1000)
 			fixArray.append(vehicle)
-		logger.info("(Request count: "+str(requestCount)+") Number of vehicle fixes returned: "+str(len(fixArray)))
+		logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") Number of vehicle fixes returned: "+str(len(fixArray)))
 	return fixArray
 
 def dumpFixes(fixes, fileName):
+	#figure out a better way to do this...
 	strWrite = json.dumps(fixes)
-	strWrite = strWrite.replace("[","").replace("]","")  #figure out a better way to do this
+	strWrite = strWrite.replace("[","").replace("]","").replace("}, {","}{")  				
+	strWrite = strWrite.replace("}","}\n")
 	with open(config["datafilePath"]+"/"+fileName+".json", "a") as dumpFile:
     		dumpFile.write(strWrite)
+
 
 	
 def main(argv):
@@ -136,21 +151,19 @@ def main(argv):
 	execfile(configFile, config)
 	logger=initLog()
 	logger.info('Starting Run  ========================================')
-	apiKeys=config["apiKeys"]	
-	currentKey = apiKeys[0]
+	apiKeys=initAPIKeys(config["apiKeys"])
 	currentDay = currentDayStr() 	
 	#Get the routes
-	routes = fetchRoutes(config["routesURL"],currentKey)
+	routes = fetchRoutes(config["routesURL"],apiKeys)
 	routeRequests = breakupRoutes(routes,config["routesPerRequest"])
 	done = False
 	while not done:
-		for x in range (0,len(routeRequests)):
-			fixes=makeRouteRequest(config["vehiclesURL"],routeRequests[x], currentKey)
-			if currentDay<>currentDayStr():    # A new day is upon us
-				currentDay = currentDayStr()
-			dumpFixes(fixes, currentDay)
-		time.sleep(60) 
-		logger.info('Sleeping  ========================================')
+		if int(time.strftime("%S")) == 0:
+			for x in range (0,len(routeRequests)):
+				fixes=makeRouteRequest(config["vehiclesURL"],routeRequests[x], apiKeys)
+				if currentDay<>currentDayStr():    # A new day is upon us
+					currentDay = currentDayStr()
+				dumpFixes(fixes, currentDay)
 	logger.info('Done!  ========================================')
 
 if __name__ == "__main__":
