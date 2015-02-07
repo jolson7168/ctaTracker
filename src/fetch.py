@@ -92,7 +92,7 @@ def makeRouteRequest(url, routes, apiKeys):
 		if (errorStr == ""):
 			logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") General error: "+error)
 		else:
-			if errorStr[-1:]=",":
+			if errorStr[-1:]==",":
 				errorStr = errorStr[:-1] 	
 			logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") No data reported on the following routes: "+errorStr)
 
