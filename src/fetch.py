@@ -170,7 +170,7 @@ def main(argv):
 					currentDay = currentDayStr()
 					apiKeys=initAPIKeys(config["apiKeys"])  #reset the counters
 				dumpFixes(fixes, currentDay)
-		if int(time.strftime("%M")) == 0:	#Once per hour (per day??)
+		if (int(time.strftime("%M")) == 0) and (int(time.strftime("%S")) == 30):	#Once per hour (per day??)
 			routes = fetchRoutes(config["routesURL"],apiKeys)
 			routeRequests = breakupRoutes(routes,config["routesPerRequest"])
 
