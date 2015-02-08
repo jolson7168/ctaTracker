@@ -129,8 +129,6 @@ def dumpFixes(fixes, fileName):
 	with open(config["datafilePath"]+"/"+fileName+".json", "a") as dumpFile:
     		dumpFile.write(strWrite)
 
-
-	
 def main(argv):
  	try:
       		opts, args = getopt.getopt(argv,"hc:",["configfile="])
@@ -150,22 +148,32 @@ def main(argv):
 				sys.exit(2)
 	execfile(configFile, config)
 	logger=initLog()
-	logger.info('Starting Run  ========================================')
+	logger.info('Starting Run: '+currentDayStr()+'  ========================================')
 	apiKeys=initAPIKeys(config["apiKeys"])
-	currentDay = currentDayStr() 	
+	currentDay = currentDayStr()
 	#Get the routes
 	routes = fetchRoutes(config["routesURL"],apiKeys)
 	routeRequests = breakupRoutes(routes,config["routesPerRequest"])
 	done = False
 	while not done:
-		if int(time.strftime("%S")) == 0:
+		if int(time.strftime("%S")) == 0:  #Once per minute
 			for x in range (0,len(routeRequests)):
 				fixes=makeRouteRequest(config["vehiclesURL"],routeRequests[x], apiKeys)
 				if currentDay<>currentDayStr():    # A new day is upon us
+					logger.info("Doing end of day. From "+currentDay+" to "+currentDayStr() +". Resetting API counters, and archiving log.")
+					logger.info('Done: '+currentDayStr()+'  ========================================')
+					logger.handlers[0].stream.close()
+					logger.removeHandler(logger.handlers[0])
+					os.rename(config["logFile"],config["logFile"].replace(".log","_"+currentDay+".log"))
+					logger=initLog()
+					logger.info('Starting Run: '+currentDayStr()+'  ========================================')
 					currentDay = currentDayStr()
 					apiKeys=initAPIKeys(config["apiKeys"])  #reset the counters
 				dumpFixes(fixes, currentDay)
-	logger.info('Done!  ========================================')
+		if int(time.strftime("%M")) == 0:	#Once per hour (per day??)
+			routes = fetchRoutes(config["routesURL"],apiKeys)
+			routeRequests = breakupRoutes(routes,config["routesPerRequest"])
+
 
 if __name__ == "__main__":
 	main(sys.argv[1:])
