@@ -98,26 +98,29 @@ def makeRouteRequest(url, routes, apiKeys):
 
 	if "vehicle" in fixes:
 		for vehicle in fixes["vehicle"]:
-			if "vid" in vehicle: 
-				vehicle["vid"] = int(vehicle["vid"])
-			if "lat" in vehicle:
-				vehicle["lat"] = float(vehicle["lat"])
-			if "lon" in vehicle:
-				vehicle["lon"] = float(vehicle["lon"])
-			if "hdg" in vehicle:
-				vehicle["hdg"] = int(vehicle["hdg"])
-			if "pid" in vehicle:
-				vehicle["pid"] = int(vehicle["pid"])
-			if "pdist" in vehicle:
-				vehicle["pdist"] = int(vehicle["pdist"])
-			if "spd" in vehicle:
-				vehicle["spd"] = int(vehicle["spd"])
-			if "tatripid" in vehicle:
-				vehicle["tatripid"] = int(vehicle["tatripid"])
-			# Nice to have, but takes up too much space...			
-			#if "tmstmp" in vehicle:
-			#	vehicle["javascripttime"] = int(time.mktime(time.strptime(vehicle["tmstmp"], "%Y%m%d %H:%M"))*1000)
-			fixArray.append(vehicle)
+			try:
+				if "vid" in vehicle: 
+					vehicle["vid"] = int(vehicle["vid"])
+				if "lat" in vehicle:
+					vehicle["lat"] = float(vehicle["lat"])
+				if "lon" in vehicle:
+					vehicle["lon"] = float(vehicle["lon"])
+				if "hdg" in vehicle:
+					vehicle["hdg"] = int(vehicle["hdg"])
+				if "pid" in vehicle:
+					vehicle["pid"] = int(vehicle["pid"])
+				if "pdist" in vehicle:
+					vehicle["pdist"] = int(vehicle["pdist"])
+				if "spd" in vehicle:
+					vehicle["spd"] = int(vehicle["spd"])
+				if "tatripid" in vehicle:
+					vehicle["tatripid"] = int(vehicle["tatripid"])
+				# Nice to have, but takes up too much space...			
+				#if "tmstmp" in vehicle:
+				#	vehicle["javascripttime"] = int(time.mktime(time.strptime(vehicle["tmstmp"], "%Y%m%d %H:%M"))*1000)
+				fixArray.append(vehicle)
+			except:
+				logger.error("Type Conversion Error: "+json.dums(vehicle))
 		logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") Number of vehicle fixes returned: "+str(len(fixArray)))
 	return fixArray
 
