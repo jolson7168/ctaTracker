@@ -49,6 +49,7 @@ def fetchRoutes(url, apiKeys):
 	whichKey = int(time.strftime("%H")) % len(apiKeys)
 	logger = logging.getLogger(config["logname"])
 	tempRoutes = {}
+	#trap exception here
 	r1=requests.get(url+apiKeys[whichKey].key)
 	apiKeys[whichKey].counter = apiKeys[whichKey].counter+1
 	logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") Requesting Routes...")
@@ -77,6 +78,7 @@ def makeRouteRequest(url, routes, apiKeys):
 	whichKey = int(time.strftime("%H")) % len(apiKeys)
 	fixArray = []
 	tempFixes = {}
+	#trap exception here
 	f1=requests.get(url+apiKeys[whichKey].key+"&rt="+routes)
 	apiKeys[whichKey].counter = apiKeys[whichKey].counter+1
 	logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") Requesting fixes by routes ("+routes+")"+"...")
@@ -129,8 +131,10 @@ def dumpFixes(fixes, fileName):
 	strWrite = json.dumps(fixes)
 	strWrite = strWrite.replace("[","").replace("]","").replace("}, {","}{")  				
 	strWrite = strWrite.replace("}","}\n")
+	#Try-catch here
 	with open(config["datafilePath"]+"/"+fileName+".json", "a") as dumpFile:
     		dumpFile.write(strWrite)
+		dumpFile.close()
 
 def main(argv):
  	try:
