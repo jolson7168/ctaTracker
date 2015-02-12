@@ -49,7 +49,7 @@ def fetchRoutes(url, apiKeys):
 	whichKey = int(time.strftime("%H")) % len(apiKeys)
 	logger = logging.getLogger(config["logname"])
 	tempRoutes = {}
-	#trap exception here
+	#trap exception here.
 	r1=requests.get(url+apiKeys[whichKey].key)
 	apiKeys[whichKey].counter = apiKeys[whichKey].counter+1
 	logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") Requesting Routes...")
@@ -78,11 +78,24 @@ def makeRouteRequest(url, routes, apiKeys):
 	whichKey = int(time.strftime("%H")) % len(apiKeys)
 	fixArray = []
 	tempFixes = {}
-	#trap exception here
-	f1=requests.get(url+apiKeys[whichKey].key+"&rt="+routes)
-	apiKeys[whichKey].counter = apiKeys[whichKey].counter+1
-	logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") Requesting fixes by routes ("+routes+")"+"...")
-	fixes = dict(xmltodict.parse(f1.text)['bustime-response'])
+	goodRequest = False
+	tries = 0
+	while (not goodRequest) and (tries <=5):
+		try:
+			f1=requests.get(url+apiKeys[whichKey].key+"&rt="+routes)
+			goodRequest = True
+			apiKeys[whichKey].counter = apiKeys[whichKey].counter+1
+			logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") Requesting fixes by routes ("+routes+")"+"...")
+		except:
+			apiKeys[whichKey].counter = apiKeys[whichKey].counter+1
+			tries = tries+1
+			logger.error("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") HTTP Request error - try: "+str(tries))
+			time.sleep(3)
+	if (tries == 6):
+		logger.error("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") HTTP Request error - Max tries: "+str(tries))
+		return None
+
+	fixes = dict(xmltodict.parse(f1.text)['bustime-response'])	
 	if "error" in fixes:
 		errorStr=""
 		for error in fixes["error"]:
@@ -176,7 +189,8 @@ def main(argv):
 					logger.info('Starting Run: '+currentDayStr()+'  ========================================')
 					currentDay = currentDayStr()
 					apiKeys=initAPIKeys(config["apiKeys"])  #reset the counters
-				dumpFixes(fixes, currentDay)
+				if fixes is not None:
+					dumpFixes(fixes, currentDay)
 		if (int(time.strftime("%M")) == 0) and (int(time.strftime("%S")) == 30):	#Once per hour (per day??)
 			routes = fetchRoutes(config["routesURL"],apiKeys)
 			routeRequests = breakupRoutes(routes,config["routesPerRequest"])
