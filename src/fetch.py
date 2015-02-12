@@ -9,7 +9,8 @@ import time
 import decimal
 import requests
 import xmltodict
-
+import boto
+from boto.s3.key import Key
 
 config = {}
 apiKeys=[]
@@ -142,12 +143,44 @@ def makeRouteRequest(url, routes, apiKeys):
 def dumpFixes(fixes, fileName):
 	#figure out a better way to do this...
 	strWrite = json.dumps(fixes)
-	strWrite = strWrite.replace("[","").replace("]","").replace("}, {","}{")  				
-	strWrite = strWrite.replace("}","}\n")
+	strWrite = strWrite.replace("[","").replace("]","").replace("{","\t\t{").replace("},","},\n") 
 	#Try-catch here
+	newFile = os.path.isfile(config["datafilePath"]+"/"+fileName+".json") 
 	with open(config["datafilePath"]+"/"+fileName+".json", "a") as dumpFile:
+		if not newFile:
+			dumpFile.write('{\n\t"fixes":[\n')	
     		dumpFile.write(strWrite)
 		dumpFile.close()
+
+def closeJSON(filepath):
+	with open(filepath, "a") as aFile:
+    		aFile.write("\n\t]\n}")
+    		aFile.close()
+
+def upload_to_s3(aws_access_key_id, aws_secret_access_key, file, bucket, key, callback=None, md5=None, reduced_redundancy=False, content_type=None):
+
+    try:
+        size = os.fstat(file.fileno()).st_size
+    except:
+        # Not all file objects implement fileno(),
+        # so we fall back on this
+        file.seek(0, os.SEEK_END)
+        size = file.tell()
+
+    conn = boto.connect_s3(aws_access_key_id, aws_secret_access_key)
+    bucket = conn.get_bucket(bucket, validate=True)
+    k = Key(bucket)
+    k.key = key
+    if content_type:
+        k.set_metadata('Content-Type', content_type)
+    sent = k.set_contents_from_file(file, cb=callback, md5=md5, reduced_redundancy=reduced_redundancy, rewind=True)
+
+    # Rewind for later use
+    file.seek(0)
+
+    if sent == size:
+        return True
+    return False
 
 def main(argv):
  	try:
@@ -185,6 +218,12 @@ def main(argv):
 					logger.handlers[0].stream.close()
 					logger.removeHandler(logger.handlers[0])
 					os.rename(config["logFile"],config["logFile"].replace(".log","_"+currentDay+".log"))
+					closeJSON(config["logFile"].replace(".log","_"+currentDay+".log"))
+					#file = open(config["logFile"].replace(".log","_"+currentDay+".log"), 'r+')
+					#if uploadToS3(config["AWS_ACCESS_KEY"],config["AWS_ACCESS_SECRET_KEY"],file,config["bucket-name"],content_type="application/json"):
+					#	logger.info("File: "+config["logFile"].replace(".log","_"+currentDay+".log")+" uploaded to S3 bucket "+config["bucket-name"])
+					#else:
+					#	logger.error("File: "+config["logFile"].replace(".log","_"+currentDay+".log")+" NOT uploaded to S3 bucket "+config["bucket-name"])
 					logger=initLog()
 					logger.info('Starting Run: '+currentDayStr()+'  ========================================')
 					currentDay = currentDayStr()
