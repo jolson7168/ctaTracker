@@ -233,7 +233,7 @@ def main(argv):
 				if fixes is not None:
 					dumpFixes(fixes, currentDay)
 				logger.info('Sleeping for '+str(57-int(time.strftime("%S"))+" seconds"))
-				time.sleep(57-int(time.strftime("%S"))
+				time.sleep(57-int(time.strftime("%S")))
 
 
 if __name__ == "__main__":
