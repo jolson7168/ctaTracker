@@ -232,7 +232,7 @@ def main(argv):
 					routeRequests = breakupRoutes(routes,config["routesPerRequest"])
 				if fixes is not None:
 					dumpFixes(fixes, currentDay)
-				logger.info('Sleeping for '+str(57-int(time.strftime("%S"))+" seconds")
+				logger.info('Sleeping for '+str(57-int(time.strftime("%S"))+" seconds"))
 				time.sleep(57-int(time.strftime("%S"))
 
 
