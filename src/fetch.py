@@ -228,11 +228,12 @@ def main(argv):
 					logger.info('Starting Run: '+currentDayStr()+'  ========================================')
 					currentDay = currentDayStr()
 					apiKeys=initAPIKeys(config["apiKeys"])  #reset the counters
+					routes = fetchRoutes(config["routesURL"],apiKeys) #re-load the routes
+					routeRequests = breakupRoutes(routes,config["routesPerRequest"])
 				if fixes is not None:
 					dumpFixes(fixes, currentDay)
-		if (int(time.strftime("%M")) == 0) and (int(time.strftime("%S")) == 30):	#Once per hour (per day??)
-			routes = fetchRoutes(config["routesURL"],apiKeys)
-			routeRequests = breakupRoutes(routes,config["routesPerRequest"])
+				logger.info('Sleeping for '+str(57-int(time.strftime("%S"))+" seconds")
+				time.sleep(57-int(time.strftime("%S"))
 
 
 if __name__ == "__main__":
