@@ -233,7 +233,7 @@ def main(argv):
 				if fixes is not None:
 					dumpFixes(fixes, currentDay)
 				sleepSec = 57-int(time.strftime("%S"))
-				logger.info('Sleeping for '+str(sleepSec)+" seconds"))
+				logger.info('Sleeping for '+str(sleepSec)+" seconds")
 				time.sleep(57-int(time.strftime("%S")))
 
 
