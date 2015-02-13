@@ -136,7 +136,7 @@ def makeRouteRequest(url, routes, apiKeys):
 				#	vehicle["javascripttime"] = int(time.mktime(time.strptime(vehicle["tmstmp"], "%Y%m%d %H:%M"))*1000)
 				fixArray.append(vehicle)
 			except:
-				logger.error("Type Conversion Error: "+json.dums(vehicle))
+				logger.error("Type Conversion Error: "+json.dumps(vehicle))
 		logger.info("(Key "+apiKeys[whichKey].key[:3]+" count: "+str(apiKeys[whichKey].counter)+") Number of vehicle fixes returned: "+str(len(fixArray)))
 	return fixArray
 
