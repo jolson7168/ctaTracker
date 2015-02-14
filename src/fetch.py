@@ -218,7 +218,7 @@ def main(argv):
 					logger.handlers[0].stream.close()
 					logger.removeHandler(logger.handlers[0])
 					os.rename(config["logFile"],config["logFile"].replace(".log","_"+currentDay+".log"))
-					closeJSON(config["logFile"].replace(".log","_"+currentDay+".log"))
+					closeJSON(config["datafilePath"]+"/"+currentDay+".json")
 					#file = open(config["logFile"].replace(".log","_"+currentDay+".log"), 'r+')
 					#if uploadToS3(config["AWS_ACCESS_KEY"],config["AWS_ACCESS_SECRET_KEY"],file,config["bucket-name"],content_type="application/json"):
 					#	logger.info("File: "+config["logFile"].replace(".log","_"+currentDay+".log")+" uploaded to S3 bucket "+config["bucket-name"])
