@@ -44,8 +44,8 @@ if (mode == "validate"):
 		sys.exit(2)
 elif (mode == "close"):
 	with open(jsonFile, "a") as aFile:
-	aFile.write("\n\t]\n}")
-	aFile.close()
+		aFile.write("\n\t]\n}")
+		aFile.close()
 
 
 
