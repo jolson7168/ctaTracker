@@ -14,9 +14,9 @@ def main(argv):
 		if opt == '-h':
 	 		print ('validate.py -v <jsonfile>')
 	 		sys.exit()
-		elif opt in ("-v", "--jsonfile"):
+		elif opt in ("-v", "--validate"):
 			jsonFile=arg
-			mode = validate
+			mode = "validate"
 			try:
 				with open(jsonFile): pass
 			except IOError:
@@ -32,20 +32,20 @@ def main(argv):
 				sys.exit(2)
 
 
-if (mode == "validate"):
-	with open (jsonFile, "r") as inFile:
-	    data=inFile.read().replace('\n', '')
-	try:
-		json_object = json.loads(data)
-		print("Valid JSON!")
-		sys.exit()
-	except Exception, e:
-		print("Invalid JSON: "+str(e))
-		sys.exit(2)
-elif (mode == "close"):
-	with open(jsonFile, "a") as aFile:
-		aFile.write("\n\t]\n}")
-		aFile.close()
+		if (mode == "validate"):
+			with open (jsonFile, "r") as inFile:
+			    data=inFile.read().replace('\n', '')
+			try:
+				json_object = json.loads(data)
+				print("Valid JSON!")
+				sys.exit()
+			except Exception, e:
+				print("Invalid JSON: "+str(e))
+				sys.exit(2)
+		elif (mode == "close"):
+			with open(jsonFile, "a") as aFile:
+				aFile.write("\n\t]\n}")
+				aFile.close()
 
 
 
