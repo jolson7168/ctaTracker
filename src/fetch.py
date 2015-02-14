@@ -144,6 +144,7 @@ def dumpFixes(fixes, fileName):
 	#figure out a better way to do this...
 	strWrite = json.dumps(fixes)
 	strWrite = strWrite.replace("[","").replace("]","").replace("{","\t\t{").replace("},","},\n") 
+	strWrite = strWrite+",\n"
 	#Try-catch here
 	newFile = os.path.isfile(config["datafilePath"]+"/"+fileName+".json") 
 	with open(config["datafilePath"]+"/"+fileName+".json", "a") as dumpFile:

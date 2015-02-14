@@ -34,7 +34,7 @@ def main(argv):
 
 	if (mode == "validate"):
 		with open (jsonFile, "r") as inFile:
-		    data=inFile.read().replace('\n', '')
+		    data=inFile.read()
 		try:
 			json_object = json.loads(data)
 			print("Valid JSON!")
