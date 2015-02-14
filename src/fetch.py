@@ -132,7 +132,7 @@ def makeRouteRequest(url, routes, apiKeys):
 				if "tatripid" in vehicle:
 					vehicle["tatripid"] = int(vehicle["tatripid"])
 				if "zone" in vehicle:
-					if vehicle["zone"] = "null":
+					if vehicle["zone"] == "null":
 						vehicle["zone"] = '"null"'
 				# Nice to have, but takes up too much space...			
 				#if "tmstmp" in vehicle:
