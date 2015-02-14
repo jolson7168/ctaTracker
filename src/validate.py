@@ -6,7 +6,7 @@ import getopt
 
 def main(argv):
 	try:
-		opts, args = getopt.getopt(argv,"hv:",["jsonfile="])
+		opts, args = getopt.getopt(argv,"hv:c:",["validate=","close="])
 	except getopt.GetoptError:
 		print ('validate.py -v <jsonfile>')
 		sys.exit(2)
