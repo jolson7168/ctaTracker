@@ -20,6 +20,13 @@ def getYesterdayStr():
 	t = datetime.date.fromordinal(datetime.date.today().toordinal()-1)
 	return t.strftime("%Y%m%d")
 
+def closeJSON(filepath):
+	with open(filepath, "rb+") as aFile:
+    		aFile.seek(-2, os.SEEK_END)
+		aFile.truncate()
+    		aFile.write("\n\t]\n}\n")
+    		aFile.close()
+
 def initLog():
 	logger = logging.getLogger(config["logname"])
 	hdlr = logging.FileHandler(config["logFile"])
@@ -62,7 +69,18 @@ def uploadToS3(aws_access_key_id, aws_secret_access_key, file, bucket, key, call
         return True
     return False
 
+def cleanUpJSON(filepath):
+	with open(filepath, "r") as aFile:
+		data=aFile.read()
+		aFile.close()
+		data=data.replace('"tmstmp", "rt", "des", "tablockid"',",\n")
+		data=data.replace("}\t", "},\n")
+		data=data.replace("\n,", "\n")
 
+	with open(filepath, "w+") as aFile2:
+		aFile2.write(data)
+		aFile2.close()
+		
 def main(argv):
  	try:
       		opts, args = getopt.getopt(argv,"hc:",["configfile="])
@@ -83,10 +101,14 @@ def main(argv):
 	execfile(configFile, config)
 	logger=initLog()
 	logger.info('Starting EOD for: '+getYesterdayStr()+'  ===========================')
-	logger.info('Validating JSON...')
 	if not os.path.isfile(config["dataDir"]+"/"+getYesterdayStr()+".json"):
 		logger.error("Missing yesterday's data file: "+config["dataDir"]+"/"+getYesterdayStr()+".json")
 	else:
+		logger.info('Cleaning up JSON...')
+		cleanUpJSON(config["dataDir"]+"/"+getYesterdayStr()+".json")
+		logger.info('Closing JSON...')
+		closeJSON(config["dataDir"]+"/"+getYesterdayStr()+".json")
+		logger.info('Validating JSON...')
 		with open (config["dataDir"]+"/"+getYesterdayStr()+".json", "r") as inFile:
 			data=inFile.read()
 			goodJSON = True
