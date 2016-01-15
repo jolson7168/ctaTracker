@@ -99,7 +99,10 @@ def makeRouteRequest(url, routes, apiKeys):
 		errorStr=""
 		for error in fixes["error"]:
 			if isinstance(error, basestring):
-				errorStr=fixes["error"]["rt"]
+				if "rt" in fixes["error"]:
+					errorStr=fixes["error"]["rt"]
+				else:
+					errorStr=error
 			else:
 				if "rt" in error:
 					errorStr=errorStr+error["rt"]+","
