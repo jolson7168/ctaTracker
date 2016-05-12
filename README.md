@@ -8,8 +8,8 @@ Just want the historical CTA fix data? Check out the [ctaData project](https://g
 ## Installation
 External packages needed:
 ```
-[xmltodict](https://github.com/martinblech/xmltodict)	(sudo pip install xmltodict)
-[boto](https://github.com/boto/boto)		(sudo pip install boto)
+xmltodict   (sudo pip install xmltodict)
+boto		(sudo pip install boto)
 ```
 
 ### Config Files
