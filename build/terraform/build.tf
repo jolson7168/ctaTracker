@@ -13,7 +13,7 @@ resource "aws_security_group" "ctaTracker" {
   ingress {
     from_port = 22
     to_port   = 22
-    protocol  = "-1"
+    protocol  = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -29,7 +29,6 @@ resource "aws_security_group" "ctaTracker" {
   }
 }
 
-
 resource "template_file" "salt_bootstrap_ctaTracker" {
     count    = "${var.ctaTracker_count}"
     template = "${file("salt_bootstrap_ctaTracker.tpl")}"
@@ -40,6 +39,12 @@ resource "template_file" "salt_bootstrap_ctaTracker" {
     }
 }
 
+
+resource "aws_eip" "ctaTracker" {
+    instance = "${aws_instance.ctaTracker.id}"
+    vpc = true
+}
+
 resource "aws_instance" "ctaTracker" {
 
     count = "${var.ctaTracker_count}" 
@@ -47,7 +52,7 @@ resource "aws_instance" "ctaTracker" {
     instance_type = "t2.micro"
     subnet_id = "${var.aws_subnet_id}"
     vpc_security_group_ids = ["${aws_security_group.ctaTracker.id}"]
-    associate_public_ip_address = false
+    associate_public_ip_address = true
     private_ip = "${lookup(var.ctaTracker_ips, count.index)}"
     availability_zone = "${var.aws_availability_zone}"
     instance_initiated_shutdown_behavior = "stop"
