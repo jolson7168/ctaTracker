@@ -43,7 +43,7 @@ resource "template_file" "salt_bootstrap_ctaTracker" {
 resource "aws_instance" "ctaTracker" {
 
     count = "${var.ctaTracker_count}" 
-    ami = "${var.aws_centos_ami}"
+    ami = "${var.aws_ubuntu_ami}"
     instance_type = "t2.micro"
     subnet_id = "${var.aws_subnet_id}"
     vpc_security_group_ids = ["${aws_security_group.ctaTracker.id}"]
