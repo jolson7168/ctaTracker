@@ -1,0 +1,58 @@
+
+variable "aws_access_key" {
+  description = "The AWS access key."
+  default = "<AWS access key here>"
+}
+
+variable "aws_secret_key" {
+  description = "The AWS secret key."
+  default = "<AWS secret key here>"
+}
+
+variable "aws_region" {
+  description = "The AWS region the vpc is located."
+  default = "us-east-1"
+}
+
+variable "aws_ubuntu_ami" {
+  description = "The ami for Ubuntu 16.04 x64"
+  default = "ami-fce3c696"
+}
+
+variable "aws_vpc_id" {
+  description = "The vpc id"
+  default = "<AWS VPC here>"
+}
+
+variable "aws_subnet_id" {
+  description = "The subnet id"
+  default = "<AWS subnet here>"
+}
+
+variable "aws_availability_zone" {
+  description = "The subnet id"
+  default = "us-east-1d"
+}
+
+
+
+variable "ctaTracker_count" {
+  default = 1
+}
+
+variable "ctaTracker_ips" {
+  default = {
+    "0" = "<IP address 1 here>"
+  }
+}
+
+variable "ctaTracker_hostnames" {
+  default = {
+    "0" = "ctaTracker01.local"
+  }
+}
+
+variable "ctaTracker_rsa" {
+  default = "<RSA KEY HERE>"
+}
+
